@@ -1,0 +1,7 @@
+[package]
+name = "wabbit_compiler"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+wabbit_proc_macros = { path = "wabbit_proc_macros" }
