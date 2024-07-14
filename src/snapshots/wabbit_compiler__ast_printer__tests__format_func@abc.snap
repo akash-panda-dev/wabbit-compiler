@@ -1,0 +1,7 @@
+---
+source: src/ast_printer.rs
+expression: format_func(func_abc)
+---
+func abc(a, b, c) {
+    print a * (b + c);
+}

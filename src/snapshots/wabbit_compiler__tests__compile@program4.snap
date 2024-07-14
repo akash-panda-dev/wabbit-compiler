@@ -1,0 +1,12 @@
+---
+source: src/main.rs
+expression: compile(program4)
+---
+func add1(x) {
+    x = x + 1;
+    return x
+}
+var x;
+x = 10;
+print 1035 + add1(x);
+print x;

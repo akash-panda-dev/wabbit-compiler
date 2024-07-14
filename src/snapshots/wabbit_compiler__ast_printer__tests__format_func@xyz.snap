@@ -1,0 +1,9 @@
+---
+source: src/ast_printer.rs
+expression: format_func(func_xyz)
+---
+func xyz(x, y, z) {
+    while x < y {
+        print x * (y + z);
+    }
+}

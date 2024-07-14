@@ -5,3 +5,7 @@ edition = "2021"
 
 [dependencies]
 wabbit_proc_macros = { path = "wabbit_proc_macros" }
+
+[dev-dependencies]
+insta = "1.39.0"
+rstest = "0.21.0"

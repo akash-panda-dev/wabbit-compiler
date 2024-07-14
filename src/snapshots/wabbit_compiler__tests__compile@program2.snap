@@ -1,0 +1,16 @@
+---
+source: src/main.rs
+expression: compile(program2)
+---
+var x;
+x = 3;
+var y;
+y = 4;
+var min;
+min = 0;
+if x < y {
+    min = x;
+} else {
+    min = y;
+}
+print min;

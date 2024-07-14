@@ -1,46 +1,43 @@
 use proc_macro::TokenStream;
-use quote::format_ident;
 use quote::quote;
+use syn::Data;
+use syn::Fields;
 use syn::{parse_macro_input, DeriveInput};
 
-// TODO: Fix this to also account for generics in the AST nodes as well
+#[proc_macro_derive(FromAST)]
+pub fn fromast_derive(input: TokenStream) -> TokenStream {
+    let DeriveInput { ident, data, .. } = parse_macro_input!(input as DeriveInput);
 
-#[proc_macro_derive(Expression)]
-pub fn expression_derive(input: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    let name = &input.ident;
-    let generics = &input.generics;
-    let visit_fn = format_ident!("visit_{}", name.to_string().to_lowercase());
-
-    let expanded = quote! {
-        impl<T> Visitable<T> for #name #generics {
-            fn accept(&self, visitor: &dyn Visitor<T>) -> T {
-                visitor.#visit_fn(self)
-            }
-        }
-
-        impl<T> Expression<T> for #name #generics {}
+    let data_enum = match data {
+        Data::Enum(data_enum) => data_enum,
+        _ => panic!("FromExpr can only be applied to enums"),
     };
 
-    TokenStream::from(expanded)
-}
+    let from_impls = data_enum.variants.iter().map(|variant| {
+        let variant_ident = &variant.ident;
+        let fields = match &variant.fields {
+            Fields::Unnamed(fields) => fields,
+            _ => panic!("FromExpr can only be applied to tuple variants"),
+        };
 
-#[proc_macro_derive(Statement)]
-pub fn statement_derive(input: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    let name = &input.ident;
-    let generics = &input.generics;
-    let visit_fn = format_ident!("visit_{}", name.to_string().to_lowercase());
-
-    let expanded = quote! {
-        impl<T> Visitable<T> for #name #generics {
-            fn accept(&self, visitor: &dyn Visitor<T>) -> T {
-                visitor.#visit_fn(self)
-            }
+        if fields.unnamed.len() != 1 {
+            panic!("FromExpr can only be applied to tuple variants with 1 field")
         }
 
-        impl<T> Statement<T> for #name #generics {}
+        let field_type = &fields.unnamed.first().unwrap().ty;
+
+        quote! {
+            impl From<#field_type> for #ident {
+                fn from(value: #field_type) -> Self {
+                    Self::#variant_ident(value)
+                }
+            }
+        }
+    });
+
+    let output = quote! {
+        #(#from_impls)*
     };
 
-    TokenStream::from(expanded)
+    output.into()
 }

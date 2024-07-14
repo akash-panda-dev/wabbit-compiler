@@ -1,0 +1,5 @@
+---
+source: src/ast_printer.rs
+expression: format_binop(binop_case2)
+---
+(x * 9) + (3 * 4)
