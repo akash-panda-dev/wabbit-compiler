@@ -1,15 +1,23 @@
 use wabbit_compiler::{
     ast_printer::format_program,
     model::Program,
-    passes::{constant_folding::ConstantFolding, deinit::DeInit, pass::Pass},
+    passes::{
+        constant_folding::ConstantFolding, deinit::DeInit, pass::Pass, resolve::Resolve,
+        returns::Returns, unscript::Unscript,
+    },
 };
 
-type PassFn = fn(Program) -> Program;
+#[allow(dead_code)]
+type CompilerPassFn = fn(Program) -> Program;
 
+#[allow(dead_code)]
 fn compile(program: Program) -> String {
-    let passes: Vec<(&str, PassFn)> = vec![
+    let passes: Vec<(&str, CompilerPassFn)> = vec![
         ("Constant Folding", ConstantFolding::transform_program),
         ("DeInitialization", DeInit::transform_program),
+        ("Resolve Scopes", Resolve::transform_program),
+        ("Unscript", Unscript::transform_program),
+        ("Returns", Returns::transform_program),
     ];
     let mut program = program;
     let mut compiled_code = String::new();
@@ -47,7 +55,7 @@ mod tests {
     fn test_compile() {
         /*
         var x = 10;
-        x = x + 1;
+        x = x * 1;
         print (23 * 45) + x;
         */
         let program1 = Program {

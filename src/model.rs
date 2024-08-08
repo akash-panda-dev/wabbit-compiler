@@ -89,7 +89,7 @@ pub mod statements {
 
     use super::expressions::{Expr, RelOp, Variable};
 
-    #[derive(FromAST, PartialEq, Eq)]
+    #[derive(FromAST, PartialEq, Eq, Debug)]
     pub enum Stmt {
         Func(Func),
         If(If),
@@ -100,7 +100,7 @@ pub mod statements {
         Declaration(Declaration),
     }
 
-    #[derive(PartialEq, Eq)]
+    #[derive(PartialEq, Eq, Debug)]
     pub struct Print {
         pub value: Expr,
     }
@@ -113,11 +113,11 @@ pub mod statements {
         }
     }
 
-    #[derive(PartialEq, Eq)]
+    #[derive(PartialEq, Eq, Debug)]
     pub struct Assignment {
         pub var: Variable,
         pub value: Expr,
-        pub is_decl_and_init: bool,
+        pub is_decl_and_assign: bool,
     }
 
     impl Assignment {
@@ -125,7 +125,7 @@ pub mod statements {
             Assignment {
                 var,
                 value: value.into(),
-                is_decl_and_init: true,
+                is_decl_and_assign: true,
             }
         }
 
@@ -133,12 +133,12 @@ pub mod statements {
             Assignment {
                 var,
                 value: value.into(),
-                is_decl_and_init: false,
+                is_decl_and_assign: false,
             }
         }
     }
 
-    #[derive(PartialEq, Eq)]
+    #[derive(PartialEq, Eq, Debug)]
     pub struct Declaration {
         pub var: Variable,
     }
@@ -160,7 +160,7 @@ pub mod statements {
         }
     }
 
-    #[derive(PartialEq, Eq)]
+    #[derive(PartialEq, Eq, Debug)]
     pub struct Func {
         pub name: String,
         pub args: Vec<Variable>,
@@ -177,7 +177,7 @@ pub mod statements {
         }
     }
 
-    #[derive(PartialEq, Eq)]
+    #[derive(PartialEq, Eq, Debug)]
     pub struct If {
         pub condition: RelOp,
         pub consequence: Vec<Stmt>,
@@ -194,7 +194,7 @@ pub mod statements {
         }
     }
 
-    #[derive(PartialEq, Eq)]
+    #[derive(PartialEq, Eq, Debug)]
     pub struct While {
         pub condition: RelOp,
         pub body: Vec<Stmt>,
@@ -229,15 +229,39 @@ pub mod expressions {
         pub args: Vec<Expr>,
     }
 
+    #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+    pub enum Scope {
+        LOCAL,
+        GLOBAL,
+    }
+
     #[derive(PartialEq, Eq, Debug, Clone)]
     pub struct Variable {
         pub name: String,
+        pub scope: Option<Scope>,
+    }
+
+    impl Variable {
+        pub fn new_global(value: &str) -> Self {
+            Variable {
+                name: value.to_string(),
+                scope: Some(Scope::GLOBAL),
+            }
+        }
+
+        pub fn new_local(value: &str) -> Self {
+            Variable {
+                name: value.to_string(),
+                scope: Some(Scope::LOCAL),
+            }
+        }
     }
 
     impl From<&str> for Variable {
         fn from(value: &str) -> Self {
             Variable {
                 name: value.to_string(),
+                scope: None,
             }
         }
     }

@@ -2,15 +2,18 @@
 source: src/main.rs
 expression: compile(program2)
 ---
-var x;
-x = 3;
-var y;
-y = 4;
-var min;
-min = 0;
-if x < y {
-    min = x;
-} else {
-    min = y;
+global x;
+global y;
+global min;
+func main() {
+    global[x] = 3;
+    global[y] = 4;
+    global[min] = 0;
+    if global[x] < global[y] {
+        global[min] = global[x];
+    } else {
+        global[min] = global[y];
+    }
+    print global[min];
+    return 0
 }
-print min;

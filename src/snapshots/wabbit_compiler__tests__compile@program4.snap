@@ -3,10 +3,13 @@ source: src/main.rs
 expression: compile(program4)
 ---
 func add1(x) {
-    x = x + 1;
-    return x
+    global[x] = global[x] + 1;
+    return global[x]
 }
-var x;
-x = 10;
-print 1035 + add1(x);
-print x;
+global x;
+func main() {
+    global[x] = 10;
+    print 1035 + add1(global[x]);
+    print global[x];
+    return 0
+}

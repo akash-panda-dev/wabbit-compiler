@@ -8,7 +8,9 @@ use super::pass::Pass;
 pub struct ConstantFolding;
 
 impl Pass for ConstantFolding {
-    fn transform_binop(binop: BinOp) -> Expr {
+    fn get_context() {}
+
+    fn transform_binop(binop: BinOp, _ctx: &mut ()) -> Expr {
         match (binop.op, *binop.left, *binop.right) {
             (BinOperator::Add, Expr::Number(Number::Int(n1)), Expr::Number(Number::Int(n2))) => {
                 Number::Int(n1 + n2).into()
@@ -16,9 +18,12 @@ impl Pass for ConstantFolding {
             (BinOperator::Mul, Expr::Number(Number::Int(n1)), Expr::Number(Number::Int(n2))) => {
                 Number::Int(n1 * n2).into()
             }
-            (op, left, right) => {
-                BinOp::new(op, Self::transform_expr(left), Self::transform_expr(right)).into()
-            }
+            (op, left, right) => BinOp::new(
+                op,
+                Self::transform_expr(left, _ctx),
+                Self::transform_expr(right, _ctx),
+            )
+            .into(),
         }
     }
 }
@@ -36,7 +41,7 @@ mod tests {
         let binop = BinOp::new("+".parse().unwrap(), Number::Int(1), Number::Int(3));
         let expected = Expr::from(Number::Int(4));
 
-        let actual = ConstantFolding::transform_binop(binop);
+        let actual = ConstantFolding::transform_binop(binop, &mut ());
 
         assert_eq!(expected, actual);
     }
@@ -46,7 +51,7 @@ mod tests {
         let binop = BinOp::new("*".parse().unwrap(), Number::Int(2), Number::Int(3));
         let expected = Expr::from(Number::Int(6));
 
-        let actual = ConstantFolding::transform_binop(binop);
+        let actual = ConstantFolding::transform_binop(binop, &mut ());
 
         assert_eq!(expected, actual);
     }
@@ -57,7 +62,7 @@ mod tests {
         let expected: Expr =
             BinOp::new("+".parse().unwrap(), Variable::from("a"), Number::Int(3)).into();
 
-        let actual = ConstantFolding::transform_binop(binop);
+        let actual = ConstantFolding::transform_binop(binop, &mut ());
 
         assert_eq!(expected, actual);
     }

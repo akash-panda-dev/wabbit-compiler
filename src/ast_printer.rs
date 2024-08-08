@@ -3,7 +3,7 @@
 use std::env::var;
 use std::ops::Add;
 
-use crate::model::expressions::{BinOp, Number, RelOp};
+use crate::model::expressions::{BinOp, Number, RelOp, Scope};
 use crate::model::statements::{Assignment, Func, If, Print, Return, While};
 use crate::model::RelOperator;
 use crate::model::{
@@ -48,23 +48,60 @@ fn format_stmt(stmt: &Stmt) -> String {
         Print(print) => format!("print {};", format_expr(&print.value)),
         Return(r#return) => format_return(r#return),
         Assignment(assignment) => {
-            if assignment.is_decl_and_init {
+            if assignment.is_decl_and_assign {
                 format!(
                     "var {} = {};",
                     assignment.var.name,
                     format_expr(&assignment.value)
                 )
             } else {
+                format_assign_without_decl(assignment)
+            }
+        }
+        Declaration(declaration) => {
+            if let Some(scope) = declaration.var.scope {
+                match scope {
+                    Scope::GLOBAL => {
+                        format!("global {};", declaration.var.name)
+                    }
+                    Scope::LOCAL => {
+                        format!("local {};", declaration.var.name)
+                    }
+                }
+            } else {
+                format!("var {};", declaration.var.name)
+            }
+        }
+    }
+}
+
+#[allow(clippy::bool_comparison)]
+fn format_assign_without_decl(assignment: &Assignment) -> String {
+    assert!(assignment.is_decl_and_assign != true);
+
+    if let Some(scope) = assignment.var.scope {
+        match scope {
+            Scope::GLOBAL => {
                 format!(
-                    "{} = {};",
+                    "global[{}] = {};",
+                    assignment.var.name,
+                    format_expr(&assignment.value)
+                )
+            }
+            Scope::LOCAL => {
+                format!(
+                    "local[{}] = {};",
                     assignment.var.name,
                     format_expr(&assignment.value)
                 )
             }
         }
-        Declaration(declaration) => {
-            format!("var {};", declaration.var.name)
-        }
+    } else {
+        format!(
+            "{} = {};",
+            assignment.var.name,
+            format_expr(&assignment.value)
+        )
     }
 }
 
@@ -72,7 +109,20 @@ fn format_expr(expr: &Expr) -> String {
     use Expr::*;
     match expr {
         FuncCall(func_call) => format_func_call(func_call),
-        Variable(variable) => variable.name.clone(),
+        Variable(variable) => {
+            if let Some(scope) = variable.scope {
+                match scope {
+                    Scope::GLOBAL => {
+                        format!("global[{}]", variable.name)
+                    }
+                    Scope::LOCAL => {
+                        format!("local[{}]", variable.name)
+                    }
+                }
+            } else {
+                variable.name.to_string()
+            }
+        }
         BinOp(binop) => format_binop(binop),
         RelOp(relop) => format!(
             "{} {} {}",

@@ -2,7 +2,10 @@
 source: src/main.rs
 expression: compile(program1)
 ---
-var x;
-x = 10;
-x = x * 1;
-print 1035 + x;
+global x;
+func main() {
+    global[x] = 10;
+    global[x] = global[x] * 1;
+    print 1035 + global[x];
+    return 0
+}
