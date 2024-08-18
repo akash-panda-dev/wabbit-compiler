@@ -379,6 +379,7 @@ name = "wabbit_compiler"
 version = "0.1.0"
 dependencies = [
  "insta",
+ "lazy_static",
  "once_cell",
  "rstest",
  "wabbit_proc_macros",
