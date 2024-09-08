@@ -10,7 +10,7 @@ use crate::model::{
 /// while traversing the AST. Since the context is implementation-specific, it is
 /// specified as a type parameter in the Pass trait definition which is defaulted to . This enables
 /// each pass to define and use its own context type as needed.
-/// 
+///
 /// The default type for Context is the unit type so that Passes which don't need a context can
 /// just set it as ()
 pub trait Pass<Context = ()> {
@@ -90,7 +90,7 @@ pub trait Pass<Context = ()> {
     }
 
     fn transform_return(r#return: Return, _ctx: &mut Context) -> Stmt {
-        let expr = Self::transform_expr(r#return.expr, _ctx);
+        let expr = Self::transform_expr(r#return.value, _ctx);
         Return::new(expr).into()
     }
 

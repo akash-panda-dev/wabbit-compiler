@@ -1,3 +1,5 @@
+#![allow(unused)]
+#![allow(unused_variables)]
 /*
 The following specification lists all of the token types that are used by
 Wab:
@@ -54,7 +56,7 @@ use std::{collections::HashMap, io::BufRead};
 use lazy_static::lazy_static;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
-enum TokenType {
+pub enum TokenType {
     // Reserved Keywords
     Var,
     Print,
@@ -113,8 +115,8 @@ lazy_static! {
 
 #[derive(PartialEq, Debug)]
 pub struct Token {
-    token_type: TokenType,
-    token_str: String,
+    pub token_type: TokenType,
+    pub token_str: String,
 }
 
 impl Token {
@@ -132,7 +134,12 @@ fn tokenize<R: BufRead>(reader: R) -> Vec<Token> {
 
     while let Some(c) = char_iter.next() {
         match c {
-            c if SYMBOL_TO_TOKEN_MAP.contains_key(&c) => handle_symbol(&mut tokens, c),
+            c if SYMBOL_TO_TOKEN_MAP.contains_key(&c) => {
+                tokens.push(Token::new(
+                    *SYMBOL_TO_TOKEN_MAP.get(&c).unwrap(),
+                    c.to_string(),
+                ));
+            }
             c if c.is_whitespace() => continue,
             c if c.is_ascii_digit() => handle_digit(&mut tokens, c, &mut char_iter),
             c if c.is_ascii_alphanumeric() => handle_alphanumeric(&mut tokens, c, &mut char_iter),
@@ -145,12 +152,6 @@ fn tokenize<R: BufRead>(reader: R) -> Vec<Token> {
     }
 
     tokens
-}
-
-fn handle_symbol(tokens: &mut Vec<Token>, c: char) {
-    if let Some(&token_type) = SYMBOL_TO_TOKEN_MAP.get(&c) {
-        tokens.push(Token::new(token_type, c.to_string()));
-    }
 }
 
 fn handle_equals(

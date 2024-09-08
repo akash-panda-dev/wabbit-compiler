@@ -11,7 +11,7 @@ use super::pass::Pass;
 /// Global and Local. All variables in the top level of the code are assigned a global scope
 /// and the variables inside functions or any kind of scope are assigned a local scope.
 /// Since we recursively walk the tree, we need to pass some context to each AST node for it to be able to know
-/// which context is it in.
+/// which context it is in.
 /// 
 /// So we do exactly that, declaration and function args are used to define the scopes of the variables 
 /// and assignment or variable usage is used to get the scope from the context which is a HashMap of the
@@ -50,7 +50,7 @@ impl ScopeCtx {
     pub fn get_from_scope(&self, variable_name: &str) -> Variable {
         match self {
             ScopeCtx::Global(ctx) => ctx.get_from_scope(variable_name),
-            ScopeCtx::Local(ctx) => ctx.get(variable_name),
+            ScopeCtx::Local(ctx) => ctx.get_from_scope(variable_name),
         }
     }
 }
@@ -108,7 +108,7 @@ mod scope_ctx {
             );
         }
 
-        pub fn get(&self, variable_name: &str) -> Variable {
+        pub fn get_from_scope(&self, variable_name: &str) -> Variable {
             match self.variables.get(variable_name) {
                 Some(variable) => variable.clone(),
                 None => match *self.parent {

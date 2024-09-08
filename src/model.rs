@@ -151,12 +151,12 @@ pub mod statements {
 
     #[derive(PartialEq, Eq, Debug)]
     pub struct Return {
-        pub expr: Expr,
+        pub value: Expr,
     }
 
     impl Return {
-        pub fn new(expr: impl Into<Expr>) -> Self {
-            Return { expr: expr.into() }
+        pub fn new(value: impl Into<Expr>) -> Self {
+            Return { value: value.into() }
         }
     }
 

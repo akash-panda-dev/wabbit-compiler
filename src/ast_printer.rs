@@ -218,7 +218,7 @@ fn format_while(r#while: &While) -> String {
 }
 
 fn format_return(r#return: &Return) -> String {
-    format!("return {}", format_expr(&r#return.expr))
+    format!("return {}", format_expr(&r#return.value))
 }
 
 fn format_func_call(func_call: &FuncCall) -> String {
